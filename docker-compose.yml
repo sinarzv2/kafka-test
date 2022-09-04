@@ -1,0 +1,55 @@
+version: '3.4'
+
+services:
+  kafkaproducer:
+    image: ${DOCKER_REGISTRY-}kafkaproducer
+    container_name: kafkaproducer
+    ports:
+        - 8000:80
+        - 8001:443
+    build:
+      context: .
+      dockerfile: KafkaProducer/Dockerfile
+    depends_on:
+        - kafka
+
+  kafkaconsumer:
+    image: ${DOCKER_REGISTRY-}kafkaconsumer
+    container_name: kafkaconsumer
+    ports:
+        - 9000:80
+        - 9001:443
+    build:
+      context: .
+      dockerfile: KafkaConsumer/Dockerfile
+    depends_on:
+        - kafka
+
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:latest
+    container_name: zookeeper
+    ports:
+        - "2181:2181"
+    volumes:
+        - "zookeeper_data:/bitnami"
+    environment:
+        - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: docker.io/bitnami/kafka:latest
+    container_name: kafka
+    ports:
+        - "9092:9092"
+    volumes:
+        - "kafka_data:/bitnami"
+    environment:
+        - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+        - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+        - zookeeper
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
