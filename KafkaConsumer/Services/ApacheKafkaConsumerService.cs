@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using KafkaConsumer.Models;
 using System.Text.Json;
 
@@ -6,10 +7,10 @@ namespace KafkaConsumer.Services
 {
     public class ApacheKafkaConsumerService : BackgroundService
     {
-        private readonly string _topic = "mytest";
+        private readonly string _topic = "mytest3";
         private readonly string _bootstrapServers = "kafka:9092";
         private readonly string _groupId = "test_group";
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var config = new ConsumerConfig
             {
@@ -24,20 +25,27 @@ namespace KafkaConsumer.Services
 
             try
             {
-                new Thread(() => { StartConsumerLoop(stoppingToken, config); }).Start();
+                await CreateTopics(config);
+                new Thread(() =>
+                {
+                    
+                    StartConsumerLoop(stoppingToken, config);
+                }).Start();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-            return Task.CompletedTask;
+           
         }
 
 
         private void StartConsumerLoop(CancellationToken cancellationToken, ConsumerConfig config)
         {
+            
             using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
             consumer.Subscribe(_topic);
+
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
@@ -61,5 +69,24 @@ namespace KafkaConsumer.Services
 
         }
 
+        private  async Task CreateTopics(ConsumerConfig config)
+        {
+            var adminConfig = new AdminClientConfig(config);
+
+            using var adminClient = new AdminClientBuilder(adminConfig).Build();
+            var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
+            var existTopic = metadata.Topics.Any(a => a.Topic == _topic);
+            if(existTopic)
+                return;
+            try
+            {
+                await adminClient.CreateTopicsAsync(new[] {
+                    new TopicSpecification { Name = _topic, ReplicationFactor = 1, NumPartitions = 1 } });
+            }
+            catch (CreateTopicsException e)
+            {
+                Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace KafkaProducer.Controllers
     {
         private const string BootstrapServers = "kafka:9092";
 
-        private const string Topic = "mytest";
+        private const string Topic = "mytest3";
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest)
