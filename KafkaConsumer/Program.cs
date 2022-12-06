@@ -22,13 +22,13 @@ builder.Services.AddMassTransit(x =>
 
         rider.UsingKafka((context, k) =>
         {
-            k.Host("10.1.17.4:29092");
+            k.Host("kafka:9092");
 
             k.TopicEndpoint<OrderRequest>("topic-name", "group_id", c =>
             {
                 c.ConfigureConsumer<ApacheKafkaConsumer>(context);
-                //c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                //c.CreateIfMissing(t => t.NumPartitions = 1);
+                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                c.CreateIfMissing(t => t.NumPartitions = 1);
             });
 
         });
