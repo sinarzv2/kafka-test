@@ -1,6 +1,6 @@
 ﻿namespace KafkaConsumer.Models
 {
-    public record OrderProcessingRequest
+    public record OrderRequest
     {
         public int OrderId { get; set; }
         public int ProductId { get; set; }

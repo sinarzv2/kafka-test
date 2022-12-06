@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Text.Json;
-using Confluent.Kafka;
-using KafkaProducer.Models;
+﻿using KafkaProducer.Models;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace KafkaProducer.Controllers
 {
@@ -11,47 +9,42 @@ namespace KafkaProducer.Controllers
     [ApiController]
     public class ProducerController : ControllerBase
     {
-        private const string BootstrapServers = "kafka:9092";
 
-        private const string Topic = "mytest3";
+        private readonly IBusControl _busControl;
+        private readonly ITopicProducer<OrderRequest> _topicProducer;
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest)
+        public ProducerController(IBusControl busControl, ITopicProducer<OrderRequest> topicProducer)
         {
-            var message = JsonSerializer.Serialize(orderRequest);
-            return Ok(await SendOrderRequest(Topic, message));
+            _busControl = busControl;
+            _topicProducer = topicProducer;
         }
 
-        private async Task<bool> SendOrderRequest(string topic, string message)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest, CancellationToken cancellationToken)
         {
-            var config = new ProducerConfig
-            {
-                BootstrapServers = BootstrapServers,
-                ClientId = Dns.GetHostName(),
-                RequestTimeoutMs = 2000,
-                MessageTimeoutMs = 5000,
-                SocketTimeoutMs = 3000,
-                SocketMaxFails = 0
-            };
+            return Ok(await SendOrderRequest(orderRequest, cancellationToken));
+        }
 
+        private async Task<bool> SendOrderRequest(OrderRequest message, CancellationToken cancellationToken)
+        {
+
+          //  await _busControl.StartAsync(cancellationToken);
             try
             {
-                using var producer = new ProducerBuilder<Null, string>(config).Build();
-                var result = await producer.ProduceAsync
-                (topic, new Message<Null, string>
-                {
-                    Value = message
-                });
-
-                Debug.WriteLine($"Delivery Timestamp:{result.Timestamp.UtcDateTime}");
+                await _topicProducer.Produce(message, cancellationToken);
+                Debug.WriteLine($"Delivery Timestamp:{DateTime.UtcNow}");
                 return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error occured: {ex.Message}");
+                return false;
             }
-
-            return false;
+            finally
+            {
+             //   await _busControl.StopAsync(cancellationToken);
+            }
+           
         }
     }
 }
