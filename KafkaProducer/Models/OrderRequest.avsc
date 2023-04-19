@@ -1,0 +1,27 @@
+﻿{
+  "namespace": "confluent.io.examples.serialization.avro",
+  "name": "OrderRequest",
+  "type": "record",
+  "fields": [
+    {
+      "name": "OrderId",
+      "type": "int"
+    },
+    {
+      "name": "ProductId",
+      "type": "int"
+    },
+    {
+      "name": "CustomerId",
+      "type": "int"
+    },
+    {
+      "name": "Quantity",
+      "type": "int"
+    },
+    {
+      "name": "Status",
+      "type": "string"
+    }
+  ]
+}

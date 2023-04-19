@@ -2,6 +2,9 @@
 using Confluent.Kafka.Admin;
 using KafkaConsumer.Models;
 using System.Text.Json;
+using Confluent.Kafka.SyncOverAsync;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
 
 namespace KafkaConsumer.Services
 {
@@ -10,6 +13,7 @@ namespace KafkaConsumer.Services
         private readonly string _topic = "mytest3";
         private readonly string _bootstrapServers = "kafka:9092";
         private readonly string _groupId = "test_group";
+        private readonly string _schemaRegistryUrl = "schema-registry:8081";
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var config = new ConsumerConfig
@@ -22,14 +26,17 @@ namespace KafkaConsumer.Services
                 SocketMaxFails = 0,
                 AllowAutoCreateTopics = true
             };
-
+            var schemaRegistryConfig = new SchemaRegistryConfig
+            {
+                Url = _schemaRegistryUrl
+            };
             try
             {
                 await CreateTopics(config);
                 new Thread(() =>
                 {
                     
-                    StartConsumerLoop(stoppingToken, config);
+                    StartConsumerLoop(stoppingToken, config, schemaRegistryConfig);
                 }).Start();
             }
             catch (Exception ex)
@@ -40,11 +47,17 @@ namespace KafkaConsumer.Services
         }
 
 
-        private void StartConsumerLoop(CancellationToken cancellationToken, ConsumerConfig config)
+        private void StartConsumerLoop(CancellationToken cancellationToken, ConsumerConfig config,
+            SchemaRegistryConfig schemaRegistryConfig)
         {
-            
-            using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-            consumer.Subscribe(_topic);
+            using var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig);
+           // using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+            using var consumer =
+                new ConsumerBuilder<Null, OrderRequest>(config)
+                    .SetValueDeserializer(new AvroDeserializer<OrderRequest>(schemaRegistry).AsSyncOverAsync())
+                    .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
+                    .Build();
+                consumer.Subscribe(_topic);
 
             try
             {
@@ -52,9 +65,7 @@ namespace KafkaConsumer.Services
                 {
                     var consumeResult = consumer.Consume(cancellationToken);
 
-                    var orderRequest = JsonSerializer.Deserialize
-                        <OrderProcessingRequest>
-                        (consumeResult.Message.Value);
+                    var orderRequest = consumeResult.Message.Value;
                     if (orderRequest != null) Console.WriteLine($"Processing Order Id: {orderRequest}");
 
 

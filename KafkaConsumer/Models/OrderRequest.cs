@@ -1,7 +1,7 @@
 ﻿using Avro;
 using Avro.Specific;
 
-namespace KafkaProducer.Models
+namespace KafkaConsumer.Models
 {
     public record OrderRequest : ISpecificRecord
     {

@@ -2,6 +2,8 @@
 using System.Net;
 using System.Text.Json;
 using Confluent.Kafka;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
 using KafkaProducer.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,14 +17,16 @@ namespace KafkaProducer.Controllers
 
         private const string Topic = "mytest3";
 
+        private const string SchemaRegistryUrl = "schema-registry:8081";
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest)
         {
             var message = JsonSerializer.Serialize(orderRequest);
-            return Ok(await SendOrderRequest(Topic, message));
+            return Ok(await SendOrderRequest(Topic, orderRequest));
         }
 
-        private async Task<bool> SendOrderRequest(string topic, string message)
+        private async Task<bool> SendOrderRequest(string topic, OrderRequest message)
         {
             var config = new ProducerConfig
             {
@@ -33,17 +37,22 @@ namespace KafkaProducer.Controllers
                 SocketTimeoutMs = 3000,
                 SocketMaxFails = 0
             };
+            var schemaRegistryConfig = new SchemaRegistryConfig
+            {
+                Url = SchemaRegistryUrl
+            };
 
             try
             {
-                using var producer = new ProducerBuilder<Null, string>(config).Build();
-                var result = await producer.ProduceAsync
-                (topic, new Message<Null, string>
-                {
-                    Value = message
-                });
+                using var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig);
+                using var producer = new ProducerBuilder<Null, OrderRequest>(config)
+                    .SetValueSerializer(new AvroSerializer<OrderRequest>(schemaRegistry))
+                    .Build();
 
-                Debug.WriteLine($"Delivery Timestamp:{result.Timestamp.UtcDateTime}");
+                var result = await producer
+                    .ProduceAsync(topic, new Message<Null, OrderRequest> { Value = message });
+
+               Debug.WriteLine($"Delivery Timestamp:{result.Timestamp.UtcDateTime}");
                 return true;
             }
             catch (Exception ex)
