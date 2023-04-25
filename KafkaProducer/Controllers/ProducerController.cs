@@ -15,18 +15,20 @@ namespace KafkaProducer.Controllers
     {
         private const string BootstrapServers = "kafka:9092";
 
-        private const string Topic = "mytest3";
-
         private const string SchemaRegistryUrl = "schema-registry:8081";
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest)
         {
             var message = JsonSerializer.Serialize(orderRequest);
-            return Ok(await SendOrderRequest(Topic, orderRequest));
+            return Ok(await SendRequest("Order", orderRequest));
         }
-
-        private async Task<bool> SendOrderRequest(string topic, OrderRequest message)
+        [HttpPost("financial-transaction")]
+        public async Task<IActionResult> FinancialTransaction([FromBody] FinancialTransaction financialTransaction)
+        {
+            return Ok(await SendRequest("FinancialTransaction7", financialTransaction));
+        }
+        private async Task<bool> SendRequest<T>(string topic, T message)
         {
             var config = new ProducerConfig
             {
@@ -45,12 +47,12 @@ namespace KafkaProducer.Controllers
             try
             {
                 using var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig);
-                using var producer = new ProducerBuilder<Null, OrderRequest>(config)
-                    .SetValueSerializer(new AvroSerializer<OrderRequest>(schemaRegistry))
+                using var producer = new ProducerBuilder<Null, T>(config)
+                    .SetValueSerializer(new AvroSerializer<T>(schemaRegistry))
                     .Build();
 
                 var result = await producer
-                    .ProduceAsync(topic, new Message<Null, OrderRequest> { Value = message });
+                    .ProduceAsync(topic, new Message<Null, T> { Value = message });
 
                Debug.WriteLine($"Delivery Timestamp:{result.Timestamp.UtcDateTime}");
                 return true;

@@ -8,9 +8,9 @@ using Confluent.SchemaRegistry.Serdes;
 
 namespace KafkaConsumer.Services
 {
-    public class ApacheKafkaConsumerService : BackgroundService
+    public class ApacheKafkaConsumerOrderService : BackgroundService
     {
-        private readonly string _topic = "mytest3";
+        private readonly string _topic = "Order";
         private readonly string _bootstrapServers = "kafka:9092";
         private readonly string _groupId = "test_group";
         private readonly string _schemaRegistryUrl = "schema-registry:8081";
@@ -51,7 +51,6 @@ namespace KafkaConsumer.Services
             SchemaRegistryConfig schemaRegistryConfig)
         {
             using var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig);
-           // using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
             using var consumer =
                 new ConsumerBuilder<Null, OrderRequest>(config)
                     .SetValueDeserializer(new AvroDeserializer<OrderRequest>(schemaRegistry).AsSyncOverAsync())
@@ -66,11 +65,14 @@ namespace KafkaConsumer.Services
                     var consumeResult = consumer.Consume(cancellationToken);
 
                     var orderRequest = consumeResult.Message.Value;
-                    if (orderRequest != null) Console.WriteLine($"Processing Order Id: {orderRequest}");
-
-
+                    var options = new JsonSerializerOptions
+                    {
+                        IgnoreReadOnlyProperties = true,
+                        WriteIndented = true
+                    };
+                    var jsonString = JsonSerializer.Serialize(orderRequest, options);
+                    if (orderRequest != null) Console.WriteLine($"Processing Order: {jsonString}");
                 }
-
                 consumer.Close();
             }
             catch (OperationCanceledException)

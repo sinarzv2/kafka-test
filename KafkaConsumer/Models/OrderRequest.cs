@@ -1,4 +1,6 @@
-﻿using Avro;
+﻿using System.Text;
+using System.Text.Json.Serialization;
+using Avro;
 using Avro.Specific;
 
 namespace KafkaConsumer.Models
@@ -10,6 +12,7 @@ namespace KafkaConsumer.Models
         public int CustomerId { get; set; }
         public int Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
+
         public object Get(int fieldPos)
         {
             return fieldPos switch
@@ -27,15 +30,24 @@ namespace KafkaConsumer.Models
         {
             switch (fieldPos)
             {
-                case 0: OrderId = (int)fieldValue; break;
-                case 1: ProductId = (int)fieldValue; break;
-                case 2: CustomerId = (int)fieldValue; break;
-                case 3: Quantity = (int)fieldValue; break;
-                case 4: Status = (string)fieldValue; break;
+                case 0:
+                    OrderId = (int)fieldValue;
+                    break;
+                case 1:
+                    ProductId = (int)fieldValue;
+                    break;
+                case 2:
+                    CustomerId = (int)fieldValue;
+                    break;
+                case 3:
+                    Quantity = (int)fieldValue;
+                    break;
+                case 4:
+                    Status = (string)fieldValue;
+                    break;
                 default: throw new AvroRuntimeException("Bad index " + fieldPos + " in Put()");
             }
         }
-
         public Schema Schema => Schema.Parse(@"
 {
   ""namespace"": ""confluent.io.examples.serialization.avro"",
@@ -64,5 +76,8 @@ namespace KafkaConsumer.Models
     }
   ]
 }");
+
+
     }
 }
+

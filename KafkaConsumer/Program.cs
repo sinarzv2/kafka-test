@@ -8,7 +8,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHostedService<ApacheKafkaConsumerService>();
+builder.Services.AddHostedService<ApacheKafkaConsumerOrderService>();
+builder.Services.AddHostedService<ApacheKafkaConsumerFinancialTransactionService>();
 
 var app = builder.Build();
 

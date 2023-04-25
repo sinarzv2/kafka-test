@@ -1,0 +1,156 @@
+﻿{
+  "namespace": "confluent.io.examples.serialization.avro",
+  "name": "FinancialTransaction",
+  "type": "record",
+  "fields": [
+    {
+      "name": "TransactionId",
+      "type": "long"
+    },
+    {
+      "name": "TransactionDateTime",
+      "type": "long"
+    },
+    {
+      "name": "EffectiveDateTime",
+      "type": "long"
+    },
+    {
+      "name": "OperationCode",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
+      "name": "Amount",
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 18,
+        "scale": 0
+      }
+    },
+    {
+      "name": "PartyId",
+      "type": "long"
+    },
+    {
+      "name": "PamCode",
+      "type": "long"
+    },
+    {
+      "name": "EffectiveDateValue",
+      "type": "int"
+    },
+    {
+      "name": "Document",
+      "type": {
+        "type": "record",
+        "name": "Document",
+        "fields": [
+          {
+            "name": "Exchangetype",
+            "type": "string"
+          },
+          {
+            "name": "Volume",
+            "type": "string"
+          },
+          {
+            "name": "Price",
+            "type": "string"
+          },
+          {
+            "name": "BranchCode",
+            "type": "string"
+          },
+          {
+            "name": "SymbolName",
+            "type": "string"
+          },
+          {
+            "name": "SymbolFullName",
+            "type": "string"
+          },
+          {
+            "name": "SymbolIsin",
+            "type": "string"
+          },
+          {
+            "name": "BrokrageWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "SupervisorWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "ITCWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "ExchangeWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "CSDIWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "DiscountWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "AccessabilityExchangeWageAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          },
+          {
+            "name": "ShareProfitAmount",
+            "type": {
+              "type": "bytes",
+              "logicalType": "decimal",
+              "precision": 18,
+              "scale": 0
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
