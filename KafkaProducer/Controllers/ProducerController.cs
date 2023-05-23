@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
+using Common.ConstansVariable;
+using Common.Models;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
-using KafkaProducer.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KafkaProducer.Controllers
@@ -17,16 +18,16 @@ namespace KafkaProducer.Controllers
 
         private const string SchemaRegistryUrl = "schema-registry:8081";
 
-        [HttpPost]
+        [HttpPost("order")]
         public async Task<IActionResult> Post([FromBody] OrderRequest orderRequest)
         {
             var message = JsonSerializer.Serialize(orderRequest);
-            return Ok(await SendRequest("Order", orderRequest));
+            return Ok(await SendRequest(Topic.Order, orderRequest));
         }
         [HttpPost("financial-transaction")]
         public async Task<IActionResult> FinancialTransaction([FromBody] FinancialTransaction financialTransaction)
         {
-            return Ok(await SendRequest("FinancialTransaction7", financialTransaction));
+            return Ok(await SendRequest(Topic.FinancialTransaction, financialTransaction));
         }
         private async Task<bool> SendRequest<T>(string topic, T message)
         {

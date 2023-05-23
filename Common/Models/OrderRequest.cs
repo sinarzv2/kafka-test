@@ -1,7 +1,7 @@
 ﻿using Avro;
 using Avro.Specific;
 
-namespace KafkaProducer.Models
+namespace Common.Models
 {
     public record OrderRequest : ISpecificRecord
     {
@@ -38,7 +38,7 @@ namespace KafkaProducer.Models
 
         public Schema Schema => Schema.Parse(@"
 {
-  ""namespace"": ""confluent.io.examples.serialization.avro"",
+  ""namespace"": ""Common.Models"",
   ""name"": ""OrderRequest"",
   ""type"": ""record"",
   ""fields"": [

@@ -1,5 +1,5 @@
 ﻿{
-  "namespace": "confluent.io.examples.serialization.avro",
+  "namespace": "Common.Models",
   "name": "FinancialTransaction",
   "type": "record",
   "fields": [
@@ -45,6 +45,7 @@
     },
     {
       "name": "Document",
+      "namespace": "Common.Models",
       "type": {
         "type": "record",
         "name": "Document",
@@ -150,6 +151,27 @@
             }
           }
         ]
+      }
+    },
+    {
+      "name": "Accounts",
+      "namespace": "Common.Models",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Account",
+          "fields": [
+            {
+              "name": "AccountId",
+              "type": "long"
+            },
+            {
+              "name": "Label",
+              "type": "string"
+            }
+          ]
+        }
       }
     }
   ]

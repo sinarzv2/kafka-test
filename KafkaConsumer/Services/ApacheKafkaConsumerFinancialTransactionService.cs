@@ -1,7 +1,8 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-using KafkaConsumer.Models;
 using System.Text.Json;
+using Common.ConstansVariable;
+using Common.Models;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
@@ -10,7 +11,7 @@ namespace KafkaConsumer.Services
 {
     public class ApacheKafkaConsumerFinancialTransactionService : BackgroundService
     {
-        private readonly string _topic = "FinancialTransaction7";
+        private readonly string _topic = Topic.FinancialTransaction;
         private readonly string _bootstrapServers = "kafka:9092";
         private readonly string _groupId = "test_group";
         private readonly string _schemaRegistryUrl = "schema-registry:8081";

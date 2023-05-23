@@ -1,5 +1,5 @@
 ﻿{
-  "namespace": "confluent.io.examples.serialization.avro",
+  "namespace": "Common.Models",
   "name": "OrderRequest",
   "type": "record",
   "fields": [
